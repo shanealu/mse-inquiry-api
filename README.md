@@ -30,6 +30,37 @@ php artisan serve
 
 The API is then available at `http://localhost:8000/api/v1`. If you're on Laravel Herd, it's available at `https://mse-inquiry-api.test/api/v1`.
 
+## Seeding Demo Data
+
+For local development, seed 26 sample inquiries with a realistic mix of types and statuses:
+
+```bash
+php artisan db:seed
+```
+
+To start from a clean database and re-seed in one step:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+This runs `DatabaseSeeder`, which calls `InquirySeeder`. The distribution is:
+
+| Type               | Count | Statuses                                     |
+|--------------------|-------|----------------------------------------------|
+| `trading`          | 8     | 5 `new`, 3 `in_progress`                     |
+| `market_data`      | 5     | 5 `new`                                      |
+| `technical_issue`  | 7     | 5 `new`, 2 `resolved`                        |
+| `general_question` | 6     | 5 `new`, 1 `closed`                          |
+
+Reference numbers are populated after insert so they match the production format (`INQ-{year}-{6-digit id}`).
+
+To run only the inquiry seeder:
+
+```bash
+php artisan db:seed --class=InquirySeeder
+```
+
 ## Running Tests
 
 ```bash
