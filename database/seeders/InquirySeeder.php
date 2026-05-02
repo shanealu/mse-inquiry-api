@@ -29,8 +29,7 @@ class InquirySeeder extends Seeder
             ->withStatus($status)
             ->create()
             ->each(function (Inquiry $inquiry) {
-                $inquiry->reference_number = sprintf(
-                    'INQ-%d-%06d',
+                $inquiry->reference_number = Inquiry::formatReference(
                     $inquiry->created_at->year,
                     $inquiry->id,
                 );

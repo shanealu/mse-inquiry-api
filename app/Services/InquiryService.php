@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AuditAction;
 use App\Enums\InquiryStatus;
 use App\Models\Inquiry;
 use Illuminate\Support\Facades\DB;
@@ -24,18 +25,18 @@ class InquiryService
                 'submitted_at' => now(),
             ]);
 
-            $inquiry->reference_number = $this->buildReference($inquiry);
+            $inquiry->reference_number = Inquiry::formatReference($inquiry->created_at->year, $inquiry->id);
             $inquiry->save();
 
             $this->auditLogger->log(
                 inquiry: $inquiry,
-                action: 'created',
+                action: AuditAction::Created,
                 context: ['type' => $inquiry->type->value],
                 ip: $ip,
                 userAgent: $userAgent,
             );
 
-            return $inquiry->refresh();
+            return $inquiry;
         });
     }
 
@@ -43,19 +44,9 @@ class InquiryService
     {
         $this->auditLogger->log(
             inquiry: $inquiry,
-            action: 'viewed',
+            action: AuditAction::Viewed,
             ip: $ip,
             userAgent: $userAgent,
         );
-    }
-
-    /**
-     * Format: INQ-{YEAR}-{6-digit zero-padded id}.
-     * Sequence is tied to the global auto-increment id, not per-year.
-     * If per-year reset is required, switch to a counters table with row-level lock.
-     */
-    private function buildReference(Inquiry $inquiry): string
-    {
-        return sprintf('INQ-%d-%06d', $inquiry->created_at->year, $inquiry->id);
     }
 }

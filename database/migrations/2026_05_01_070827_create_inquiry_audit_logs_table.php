@@ -17,7 +17,6 @@ return new class extends Migration
             $table->json('context')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->string('user_agent', 500)->nullable();
-            // Audit logs are immutable — created_at only, no updated_at.
             $table->timestamp('created_at')->useCurrent();
 
             $table->index(['inquiry_id', 'action']);

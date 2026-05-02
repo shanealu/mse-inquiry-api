@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Inquiry extends Model
 {
@@ -62,5 +63,19 @@ class Inquiry extends Model
     public function scopeCreatedTo(Builder $query, string $to): Builder
     {
         return $query->where('created_at', '<=', $to);
+    }
+
+    public static function formatReference(int $year, int $id): string
+    {
+        return sprintf('INQ-%d-%06d', $year, $id);
+    }
+
+    public function resolveRouteBinding($value, $field = null): self
+    {
+        $inquiry = ctype_digit((string) $value)
+            ? $this->newQuery()->find($value)
+            : $this->newQuery()->where('reference_number', $value)->first();
+
+        return $inquiry ?? throw new NotFoundHttpException('Inquiry not found.');
     }
 }

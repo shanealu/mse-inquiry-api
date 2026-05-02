@@ -26,9 +26,9 @@ class InquiryResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'submitted_at' => $this->submitted_at?->toIso8601ZuluString(),
-            'created_at' => $this->created_at?->toIso8601ZuluString(),
-            'updated_at' => $this->updated_at?->toIso8601ZuluString(),
+            'submitted_at' => $this->submitted_at->toIso8601ZuluString(),
+            'created_at' => $this->created_at->toIso8601ZuluString(),
+            'updated_at' => $this->updated_at->toIso8601ZuluString(),
         ];
     }
 }

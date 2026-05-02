@@ -9,15 +9,30 @@ use App\Services\AuditLogger;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
-it('creates an inquiry and writes a created audit row', function () {
-    $payload = [
+/**
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function validInquiryPayload(array $overrides = []): array
+{
+    return [
         'type' => 'trading',
+        'subject' => 'Hello there',
+        'message' => 'A message of sufficient length',
+        'name' => 'Sam',
+        'email' => 'sam@example.com',
+        ...$overrides,
+    ];
+}
+
+it('creates an inquiry and writes a created audit row', function () {
+    $payload = validInquiryPayload([
         'subject' => 'Question about T+2 settlement',
         'message' => 'I would like to understand how settlement works for cross-listed shares.',
         'name' => 'Ahmed Shaneel',
         'email' => 'ahmed@example.com',
         'phone' => '+9607123456',
-    ];
+    ]);
 
     postJson('/api/v1/inquiries', $payload)
         ->assertCreated()
@@ -44,70 +59,19 @@ it('rejects invalid create payloads', function (array $payload, array $expectedE
         ->assertJsonValidationErrors($expectedErrorFields);
 })->with([
     'missing all' => [[], ['type', 'subject', 'message', 'name', 'email']],
-    'invalid type' => [
-        [
-            'type' => 'invalid',
-            'subject' => 'Hello there',
-            'message' => 'A message of sufficient length',
-            'name' => 'Sam',
-            'email' => 'sam@example.com',
-        ],
-        ['type'],
-    ],
-    'short subject' => [
-        [
-            'type' => 'trading',
-            'subject' => 'Hi',
-            'message' => 'A message of sufficient length',
-            'name' => 'Sam',
-            'email' => 'sam@example.com',
-        ],
-        ['subject'],
-    ],
-    'short message' => [
-        [
-            'type' => 'trading',
-            'subject' => 'Hello there',
-            'message' => 'short',
-            'name' => 'Sam',
-            'email' => 'sam@example.com',
-        ],
-        ['message'],
-    ],
-    'invalid email' => [
-        [
-            'type' => 'trading',
-            'subject' => 'Hello there',
-            'message' => 'A message of sufficient length',
-            'name' => 'Sam',
-            'email' => 'not-an-email',
-        ],
-        ['email'],
-    ],
-    'invalid phone' => [
-        [
-            'type' => 'trading',
-            'subject' => 'Hello there',
-            'message' => 'A message of sufficient length',
-            'name' => 'Sam',
-            'email' => 'sam@example.com',
-            'phone' => 'abc',
-        ],
-        ['phone'],
-    ],
+    'invalid type' => [validInquiryPayload(['type' => 'invalid']), ['type']],
+    'short subject' => [validInquiryPayload(['subject' => 'Hi']), ['subject']],
+    'short message' => [validInquiryPayload(['message' => 'short']), ['message']],
+    'invalid email' => [validInquiryPayload(['email' => 'not-an-email']), ['email']],
+    'invalid phone' => [validInquiryPayload(['phone' => 'abc']), ['phone']],
 ]);
 
 it('does not accept ip_address, user_agent, or submitted_at from the client', function () {
-    $payload = [
-        'type' => 'trading',
-        'subject' => 'Hello there',
-        'message' => 'A message of sufficient length',
-        'name' => 'Sam',
-        'email' => 'sam@example.com',
+    $payload = validInquiryPayload([
         'ip_address' => '9.9.9.9',
         'user_agent' => 'fake-agent',
         'submitted_at' => '2000-01-01T00:00:00Z',
-    ];
+    ]);
 
     postJson('/api/v1/inquiries', $payload, ['User-Agent' => 'real-agent'])->assertCreated();
 
@@ -125,13 +89,7 @@ it('rolls back the inquiry insert if the audit logger fails', function () {
     $this->withoutExceptionHandling([RuntimeException::class]);
 
     try {
-        postJson('/api/v1/inquiries', [
-            'type' => 'trading',
-            'subject' => 'Hello there',
-            'message' => 'A message of sufficient length',
-            'name' => 'Sam',
-            'email' => 'sam@example.com',
-        ]);
+        postJson('/api/v1/inquiries', validInquiryPayload());
         $this->fail('Expected RuntimeException to bubble up.');
     } catch (RuntimeException $e) {
         // expected
@@ -224,14 +182,7 @@ it('returns 404 for soft-deleted inquiries', function () {
 });
 
 it('does not allow the client to set the status field (server controls it)', function () {
-    postJson('/api/v1/inquiries', [
-        'type' => 'trading',
-        'subject' => 'Hello there',
-        'message' => 'A message of sufficient length',
-        'name' => 'Sam',
-        'email' => 'sam@example.com',
-        'status' => 'closed',
-    ])->assertCreated();
+    postJson('/api/v1/inquiries', validInquiryPayload(['status' => 'closed']))->assertCreated();
 
     expect(Inquiry::sole()->status)->toBe(InquiryStatus::New);
 });

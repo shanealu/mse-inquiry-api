@@ -13,13 +13,13 @@ return new class extends Migration
             // Nullable because we set it after the row's auto-increment id is assigned,
             // inside the same DB::transaction that creates the row.
             $table->string('reference_number', 20)->nullable()->unique();
-            $table->string('type', 32)->index();
+            $table->string('type', 32);
             $table->string('subject', 200);
             $table->text('message');
             $table->string('name', 120);
             $table->string('email', 255)->index();
             $table->string('phone', 30)->nullable();
-            $table->string('status', 20)->default('new')->index();
+            $table->string('status', 20)->default('new');
             $table->string('ip_address', 45)->nullable();
             $table->string('user_agent', 500)->nullable();
             $table->timestamp('submitted_at');

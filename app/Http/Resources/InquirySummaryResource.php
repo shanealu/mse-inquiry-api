@@ -24,7 +24,7 @@ class InquirySummaryResource extends JsonResource
             'subject' => $this->subject,
             'name' => $this->name,
             'email' => $this->email,
-            'submitted_at' => $this->submitted_at?->toIso8601ZuluString(),
+            'submitted_at' => $this->submitted_at->toIso8601ZuluString(),
         ];
     }
 }

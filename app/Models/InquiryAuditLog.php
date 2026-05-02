@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InquiryAuditLog extends Model
 {
-    // Audit rows are immutable — only created_at is tracked.
     public $timestamps = false;
 
     protected $fillable = [
