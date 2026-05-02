@@ -6,6 +6,7 @@ use App\Enums\InquiryStatus;
 use App\Enums\InquiryType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class ListInquiriesRequest extends FormRequest
 {
@@ -40,9 +41,26 @@ class ListInquiriesRequest extends FormRequest
     }
 
     /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'type' => 'inquiry type',
+            'status' => 'status',
+            'email' => 'email address',
+            'from' => 'from date',
+            'to' => 'to date',
+            'per_page' => 'per page',
+            'page' => 'page',
+            'sort' => 'sort',
+        ];
+    }
+
+    /**
      * Reject unknown query parameters — surfaces client bugs early (spec §5.3).
      */
-    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    public function withValidator(Validator $validator): void
     {
         $unknown = array_diff(array_keys($this->query()), self::ALLOWED_PARAMS);
 

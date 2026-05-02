@@ -47,4 +47,19 @@ class StoreInquiryRequest extends FormRequest
             'phone.regex' => 'The phone number format is invalid.',
         ];
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'type' => 'inquiry type',
+            'subject' => 'subject',
+            'message' => 'message',
+            'name' => 'name',
+            'email' => 'email address',
+            'phone' => 'phone number',
+        ];
+    }
 }
